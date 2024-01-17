@@ -40,10 +40,7 @@ function App() {
       for (const tx of txs) {
         const extendedTxData = await tx.tx();
         const { from, ...txData } = extendedTxData;
-        const signer = new ethers.Wallet(
-          "6bec59d4979fdaaf7f4b7174b84332246fb89e42b159e930bf7ea2351483b5a0",
-          provider
-        );
+        const signer = new ethers.Wallet("PrivateKey", provider);
         // const signer = provider.getSigner(from);
         const txResponse = await signer.sendTransaction({
           ...txData,
