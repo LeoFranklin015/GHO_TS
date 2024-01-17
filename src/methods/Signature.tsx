@@ -63,8 +63,8 @@ function Signature() {
     token: string,
     amount: string
   ): Promise<string> {
-    // Assuming `markets` is defined somewhere in your code
-    const spender = pool;
+    // Assuming `pool` is an instance of Pool, replace it with your actual instance
+    const spender = "0x6ae43d3271ff6888e7fc43fd7321a503ff738951"; // Assuming Pool has a method to get its address
     const tokenERC20Service = new ERC20Service(provider);
     const tokenERC2612Service = new ERC20_2612Service(provider);
 
@@ -106,18 +106,19 @@ function Signature() {
       },
       message: {
         owner: user,
-        spender, // Assuming Pool is a placeholder, replace it with the actual value
+        spender: spender,
         value: amount,
         nonce,
         deadline,
       },
     };
 
+    console.log(data);
+
     const jsonString = JSON.stringify(data);
     console.log(jsonString);
 
-    console.log(data);
-    return JSON.stringify(data);
+    return jsonString;
   }
 
   return (
