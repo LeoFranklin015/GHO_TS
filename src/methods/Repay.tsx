@@ -29,7 +29,7 @@ function Repay() {
     console.log("Transaction");
     try {
       // Correct the method to borrow from Aave
-      const txs: EthereumTransactionTypeExtended[] = await pool.borrow({
+      const txs: EthereumTransactionTypeExtended[] = await pool.repay({
         user,
         reserve,
         amount,
