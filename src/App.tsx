@@ -3,10 +3,15 @@ import { BigNumber, ethers } from "ethers";
 import { Pool } from "@aave/contract-helpers";
 
 function App() {
-  const provider = new ethers.providers.AlchemyProvider(
-    "goerli",
-    "m99NjTXDfj7CfZ8OGUqhaxG_s24IZkPh"
-  );
+  // const provider = new ethers.providers.AlchemyProvider(
+  //   "goerli",
+  //   ""//I have given my acccess key
+  // );
+  // const network = ethers.providers.getNetwork("sepolia");
+  // const provider = new ethers.providers.EtherscanProvider(network);
+  // console.log(provider);
+
+  const provider = new ethers.providers.InfuraProvider("sepolia");
   const pool = new Pool(provider, {
     POOL: "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951",
     WETH_GATEWAY: "0xDde0E8E6d3653614878Bf5009EDC317BC129fE2F",
@@ -35,7 +40,11 @@ function App() {
       for (const tx of txs) {
         const extendedTxData = await tx.tx();
         const { from, ...txData } = extendedTxData;
-        const signer = provider.getSigner(from);
+        const signer = new ethers.Wallet(
+          "6bec59d4979fdaaf7f4b7174b84332246fb89e42b159e930bf7ea2351483b5a0",
+          provider
+        );
+        // const signer = provider.getSigner(from);
         const txResponse = await signer.sendTransaction({
           ...txData,
           value: txData.value ? BigNumber.from(txData.value) : undefined,
