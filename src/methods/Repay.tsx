@@ -5,7 +5,7 @@ import {
 import { BigNumber, ethers } from "ethers";
 import { Pool } from "@aave/contract-helpers";
 
-function Borrow() {
+function Repay() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
   const pool = new Pool(provider, {
@@ -75,4 +75,4 @@ function Borrow() {
   );
 }
 
-export default Borrow;
+export default Repay;
