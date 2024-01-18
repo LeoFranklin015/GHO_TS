@@ -1,44 +1,107 @@
-import {
-  EthereumTransactionTypeExtended,
-  InterestRate,
-} from "@aave/contract-helpers";
+import { EthereumTransactionTypeExtended } from "@aave/contract-helpers";
 import { BigNumber, ethers } from "ethers";
 import { Pool } from "@aave/contract-helpers";
-import Borrow from "./methods/Borrow.js";
-import Supply from "./methods/supply.js";
-import Repay from "./methods/Repay.js";
+// import { markets } from "@bgd-labs/aave-address-book";
+
+import { WagmiConfig, createConfig } from "wagmi";
+import { sepolia } from "wagmi/chains";
+import {
+  ConnectKitProvider,
+  ConnectKitButton,
+  getDefaultConfig,
+} from "connectkit";
+import Signature from "./methods/Signature.js";
+import Swap from "./methods/Swap.js";
+
+const config = createConfig(
+  getDefaultConfig({
+    // Required API Keys
+    alchemyId: "LsWilC5MMkiLmEKlE_12IEA_MoA7dm_m", // or infuraId
+    walletConnectProjectId: "d5f4cd673d0fe10a25f4af91ccc85d0f",
+    chains: [sepolia],
+
+    // Required
+    appName: "Gho_ts",
+  })
+);
 
 function app() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-
+  const connectwalletHandler = () => {
+    if (window.ethereum) {
+      provider.send("eth_requestAccounts", []).then(async () => {
+        console.log("Connected");
+      });
+    } else {
+    }
+  };
+  connectwalletHandler();
   const pool = new Pool(provider, {
     POOL: "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951",
     WETH_GATEWAY: "0xDde0E8E6d3653614878Bf5009EDC317BC129fE2F",
   });
 
+  async function getERC20ApprovalSignature(
+    user: string,
+    reserve: string,
+    amount: string,
+    deadline: string,
+    currentAccount: string
+  ): Promise<string> {
+    try {
+      const dataToSign: string = await pool.signERC20Approval({
+        user,
+        reserve,
+        amount,
+        deadline,
+      });
+
+      // Log the dataToSign for debugging
+      console.log("Data to Sign:", dataToSign);
+
+      const signature: string = await provider.send("eth_signTypedData_v4", [
+        currentAccount,
+        dataToSign,
+      ]);
+      return signature;
+    } catch (error) {
+      // Handle errors appropriately
+      console.error("Error in getERC20ApprovalSignature:", error);
+      throw error;
+    }
+  }
+
   async function submitTransaction({
     user,
     reserve,
     amount,
-    interestRateMode,
     onBehalfOf,
+    deadline,
   }: {
     user: string;
     reserve: string;
     amount: string;
-    interestRateMode: InterestRate;
     onBehalfOf: string;
+    deadline: string;
   }) {
     console.log("Transaction");
     try {
-      // Correct the method to borrow from Aave
-      const txs: EthereumTransactionTypeExtended[] = await pool.repay({
+      const signature: string = await getERC20ApprovalSignature(
         user,
         reserve,
         amount,
-        interestRateMode,
-        onBehalfOf,
-      });
+        deadline,
+        "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334" //Current User
+      );
+      const txs: EthereumTransactionTypeExtended[] =
+        await pool.supplyWithPermit({
+          user,
+          reserve,
+          amount,
+          signature,
+          onBehalfOf,
+          deadline,
+        });
 
       // Handle each transaction in the array
       for (const tx of txs) {
@@ -61,20 +124,26 @@ function app() {
 
   return (
     <>
-    <Repay />
-      {/* <button
-        onClick={() =>
-          submitTransaction({
-            user: "0x84B325e04a106A8A4636914C22319b9daecF2892",
-            reserve: "0xf8Fb3713D459D7C1018BD0A49D19b4C44290EBE5",
-            amount: "10",
-            interestRateMode: InterestRate.Variable,
-            onBehalfOf: "0x84B325e04a106A8A4636914C22319b9daecF2892",
-          } )
-        }
-      >
-        Transaction */}
-      {/* </button> */}
+       <WagmiConfig config={config}>
+        <ConnectKitProvider>
+          {/* <button
+            onClick={() =>
+              submitTransaction({
+                user: "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334",
+                reserve: "0xc4bF5CbDaBE595361438F8c6a187bDc330539c60",
+                amount: "10",
+                onBehalfOf: "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334",
+                deadline: "3600",
+              })
+            }
+          >
+            Transaction
+          </button> */}
+          <Swap />
+          {/* <Signature /> */}
+          <ConnectKitButton />
+        </ConnectKitProvider>
+      </WagmiConfig>
     </>
   );
 }
