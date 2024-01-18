@@ -13,6 +13,8 @@ import {
 import Signature from "./methods/Signature.js";
 import Swap from "./methods/Swap.js";
 
+import { supply } from "gho-st-sdk";
+
 const config = createConfig(
   getDefaultConfig({
     // Required API Keys
@@ -27,6 +29,7 @@ const config = createConfig(
 
 function app() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
   const connectwalletHandler = () => {
     if (window.ethereum) {
       provider.send("eth_requestAccounts", []).then(async () => {
@@ -107,6 +110,7 @@ function app() {
       for (const tx of txs) {
         const extendedTxData = await tx.tx();
         const { from, ...txData } = extendedTxData;
+
         const signer = provider.getSigner(from);
 
         const txResponse = await signer.sendTransaction({
@@ -122,9 +126,19 @@ function app() {
     }
   }
 
+  async function submit() {
+    await supply({
+      user: "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334", // user address
+      reserve: "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8", // USDC
+      amount: "100",
+      onBehalfOf: "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334", // USEr address
+      provider,
+      signer,
+    });
+  }
   return (
     <>
-       <WagmiConfig config={config}>
+      <WagmiConfig config={config}>
         <ConnectKitProvider>
           {/* <button
             onClick={() =>
@@ -139,8 +153,9 @@ function app() {
           >
             Transaction
           </button> */}
-          <Swap />
-          {/* <Signature /> */}
+          {/* <Swap /> */}
+          <Signature />
+          <button onClick={async () => await submit()}>Transaction</button>
           <ConnectKitButton />
         </ConnectKitProvider>
       </WagmiConfig>
