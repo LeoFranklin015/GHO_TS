@@ -9,8 +9,7 @@ function Supply() {
       provider.send("eth_requestAccounts", []).then(async () => {
         console.log("Connected");
       });
-    } else {
-    }
+    } 
   };
   connectwalletHandler();
   const pool = new Pool(provider, {
@@ -58,10 +57,10 @@ function Supply() {
       <button
         onClick={() =>
           submitTransaction({
-            user: "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334", // user address
-            reserve: "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8", // USDC
+            user: "0x84B325e04a106A8A4636914C22319b9daecF2892", // user address
+            reserve: "0xf8Fb3713D459D7C1018BD0A49D19b4C44290EBE5", // USDC
             amount: "100",
-            onBehalfOf: "0x4b4b30e2E7c6463b03CdFFD6c42329D357205334", // USEr address
+            onBehalfOf: "0x84B325e04a106A8A4636914C22319b9daecF2892", // USEr address
           })
         }
       >
